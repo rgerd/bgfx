@@ -78,18 +78,33 @@ namespace bgfx
 
 			m_view = m_viewTmp;
 
+#if 1
 			for (uint32_t ii = 0; ii < BGFX_CONFIG_MAX_VIEWS; ++ii)
 			{
 				bx::memCopy(&m_view[ii].un.f4x4, &_frame->m_view[ii].m_view.un.f4x4, sizeof(Matrix4) );
 			}
-
+			
 			for (uint32_t ii = 0; ii < BGFX_CONFIG_MAX_VIEWS; ++ii)
-			{
+			{				
 				bx::float4x4_mul(&m_viewProj[ii].un.f4x4
 					, &m_view[ii].un.f4x4
 					, &_frame->m_view[ii].m_proj.un.f4x4
 					);
 			}
+#else
+			for (uint32_t ii = 0; ii < BGFX_CONFIG_MAX_VIEWS; ++ii)
+			{
+				if (_frame->m_view[ii].m_fbh.idx != bgfx::kInvalidHandle)
+				{
+					bx::memCopy(&m_view[ii].un.f4x4, &_frame->m_view[ii].m_view.un.f4x4, sizeof(Matrix4) );
+
+					bx::float4x4_mul(&m_viewProj[ii].un.f4x4
+						, &m_view[ii].un.f4x4
+						, &_frame->m_view[ii].m_proj.un.f4x4
+						);
+				}
+			}
+#endif
 		}
 
 		template<uint16_t mtxRegs, typename RendererContext, typename Program, typename Draw>
