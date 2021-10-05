@@ -1270,6 +1270,17 @@ namespace bgfx { namespace d3d11
 						) );
 				}
 
+				// support for SV_ViewportArrayIndex and SV_RenderTargetArrayIndex in the vertex shader is optional
+				{
+					D3D11_FEATURE_DATA_D3D11_OPTIONS3 data;
+					HRESULT hr = m_device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS3, &data, sizeof(data) );
+					if (SUCCEEDED(hr)
+					&&  data.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer)
+					{
+						g_caps.supported |= BGFX_CAPS_VIEWPORT_LAYER_ARRAY;
+					}
+				}
+
 				// 32-bit indices only supported on 9_2+.
 				if (m_featureLevel >= D3D_FEATURE_LEVEL_9_2)
 				{
@@ -2736,6 +2747,27 @@ namespace bgfx { namespace d3d11
 				}
 
 				num = uint32_t(elem-vertexElements);
+				/*
+				num++;
+				elem->SemanticName = "SV_RenderTargetArrayIndex";
+				elem->SemanticIndex = 0;
+				elem->Format = DXGI_FORMAT_R32_UINT;
+				elem->InputSlot = 1;
+				elem->AlignedByteOffset = 0;
+				elem->InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+				elem->InstanceDataStepRate = 0;
+				*/
+
+				/*
+				LPCSTR SemanticName;
+				UINT SemanticIndex;
+				DXGI_FORMAT Format;
+				UINT InputSlot;
+				UINT AlignedByteOffset;
+				D3D11_INPUT_CLASSIFICATION InputSlotClass;
+				UINT InstanceDataStepRate;
+				*/
+
 				DX_CHECK(m_device->CreateInputLayout(vertexElements
 					, num
 					, _program.m_vsh->m_code->data
